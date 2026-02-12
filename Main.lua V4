@@ -1,4 +1,4 @@
--- Elijr hub Booster – Fixed Spin Edition
+-- Elijr hub Booster – Ultimate Edition (Safe Spin, Anti-KB, Anti-Ragdoll)
 local fenv = getfenv()
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -9,10 +9,10 @@ local Enabled = false
 local SpinEnabled = false
 local Speed = 30 
 local JumpPower = 75 
-local SpinSpeed = 50 -- Lowered numeric value for AngularVelocity (still very fast)
+local SpinSpeed = 50 
 
 -- ────────────────────────────────────────────────────────────────
---                         Movement Logic
+--                         Core Logic
 -- ────────────────────────────────────────────────────────────────
 
 fenv.StartVelocityMove = function()
@@ -25,31 +25,44 @@ fenv.StartVelocityMove = function()
         local Humanoid = Character:FindFirstChildOfClass("Humanoid")
         if not HRP or not Humanoid then return end
 
-        Humanoid.UseJumpPower = true
-        Humanoid.JumpPower = JumpPower
+        -- Anti-Ragdoll: Keep the character standing
+        Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
 
+        -- Movement Boost
         local MoveDir = Humanoid.MoveDirection
         if MoveDir.Magnitude > 0 then
             local FlatDir = Vector3.new(MoveDir.X, 0, MoveDir.Z).Unit
             HRP.Velocity = Vector3.new(FlatDir.X * Speed, HRP.Velocity.Y, FlatDir.Z * Speed)
+        elseif MoveDir.Magnitude == 0 then
+            -- Anti-Knockback: Prevent being pushed when standing still
+            HRP.Velocity = Vector3.new(0, HRP.Velocity.Y, 0)
         end
+        
+        -- Apply Jump Power
+        Humanoid.UseJumpPower = true
+        Humanoid.JumpPower = JumpPower
     end)
 end
 
 fenv.StopVelocityMove = function()
     if VelocityConnection then VelocityConnection:Disconnect() VelocityConnection = nil end
+    if LocalPlayer.Character then
+        local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if Humanoid then 
+            Humanoid.JumpPower = 50 
+            Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+            Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
+        end
+    end
 end
 
--- ────────────────────────────────────────────────────────────────
---                         Safe Spin Logic
--- ────────────────────────────────────────────────────────────────
-
+-- Safe Spin Logic
 local function ToggleSpin(state)
     local Character = LocalPlayer.Character
     if not Character then return end
     local HRP = Character:FindFirstChild("HumanoidRootPart")
     if not HRP then return end
-
     local ExistingSpin = HRP:FindFirstChild("ElijrSpin")
     
     if state then
@@ -161,11 +174,10 @@ end)
 SpeedBox.FocusLost:Connect(function() Speed = tonumber(SpeedBox.Text:match("%d+")) or 30 end)
 JumpBox.FocusLost:Connect(function() JumpPower = tonumber(JumpBox.Text:match("%d+")) or 75 end)
 
--- Re-apply spin on respawn if enabled
 LocalPlayer.CharacterAdded:Connect(function(char)
     task.wait(0.5)
     if SpinEnabled then ToggleSpin(true) end
     if Enabled then fenv.StartVelocityMove() end
 end)
 
-print("Elijr hub Booster (Safe Spin) loaded!")
+print("Elijr hub Ultimate Loaded (Anti-KB & Anti-Ragdoll active with Boost)")
