@@ -1,0 +1,166 @@
+-- Elijr hub Booster – Static Slide Edition
+local fenv = getfenv()
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local VelocityConnection
+local Enabled = false
+local UnwalkEnabled = false
+local Speed = 30 
+local JumpPower = 75 
+
+-- ────────────────────────────────────────────────────────────────
+--                         Movement & Animation Logic
+-- ────────────────────────────────────────────────────────────────
+
+fenv.StartVelocityMove = function()
+    if VelocityConnection then return end
+    VelocityConnection = RunService.Heartbeat:Connect(function()
+        local Character = LocalPlayer.Character
+        if not Character or not Enabled then return end
+
+        local HRP = Character:FindFirstChild("HumanoidRootPart")
+        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+        if not HRP or not Humanoid then return end
+
+        -- 1. Apply Movement Speed
+        local MoveDir = Humanoid.MoveDirection
+        if MoveDir.Magnitude > 0 then
+            local FlatDir = Vector3.new(MoveDir.X, 0, MoveDir.Z).Unit
+            HRP.Velocity = Vector3.new(FlatDir.X * Speed, HRP.Velocity.Y, FlatDir.Z * Speed)
+        end
+        
+        -- 2. Apply Jump Power
+        Humanoid.UseJumpPower = true
+        Humanoid.JumpPower = JumpPower
+
+        -- 3. UNWALK: Freeze Animations so you slide while standing
+        if UnwalkEnabled then
+            local Animator = Humanoid:FindFirstChildOfClass("Animator")
+            if Animator then
+                for _, track in pairs(Animator:GetPlayingAnimationTracks()) do
+                    track:AdjustSpeed(0) -- Set animation speed to 0 to freeze it
+                end
+            end
+        end
+    end)
+end
+
+fenv.StopVelocityMove = function()
+    if VelocityConnection then VelocityConnection:Disconnect() VelocityConnection = nil end
+end
+
+-- ────────────────────────────────────────────────────────────────
+--                           GUI
+-- ────────────────────────────────────────────────────────────────
+
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "ElijrHubBooster"
+ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 180, 0, 240)
+MainFrame.Position = UDim2.new(1, -200, 0.5, -120)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+Instance.new("UICorner", MainFrame)
+local Stroke = Instance.new("UIStroke", MainFrame)
+Stroke.Color = Color3.fromRGB(255, 215, 0)
+Stroke.Thickness = 2.5
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Text = "Elijr hub Booster"
+Title.TextColor3 = Color3.fromRGB(255, 255, 0)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBlack
+
+local SpeedBox = Instance.new("TextBox", MainFrame)
+SpeedBox.Size = UDim2.new(1, -20, 0, 30)
+SpeedBox.Position = UDim2.new(0, 10, 0, 45)
+SpeedBox.Text = "Speed: 30"
+SpeedBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", SpeedBox)
+
+local JumpBox = Instance.new("TextBox", MainFrame)
+JumpBox.Size = UDim2.new(1, -20, 0, 30)
+JumpBox.Position = UDim2.new(0, 10, 0, 80)
+JumpBox.Text = "Jump: 75"
+JumpBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+JumpBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", JumpBox)
+
+local ToggleBtn = Instance.new("TextButton", MainFrame)
+ToggleBtn.Size = UDim2.new(1, -20, 0, 35)
+ToggleBtn.Position = UDim2.new(0, 10, 0, 120)
+ToggleBtn.Text = "BOOST → OFF"
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", ToggleBtn)
+
+local UnwalkBtn = Instance.new("TextButton", MainFrame)
+UnwalkBtn.Size = UDim2.new(1, -20, 0, 35)
+UnwalkBtn.Position = UDim2.new(0, 10, 0, 165)
+UnwalkBtn.Text = "UNWALK → OFF"
+UnwalkBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+UnwalkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", UnwalkBtn)
+
+-- ────────────────────────────────────────────────────────────────
+--                         Handlers
+-- ────────────────────────────────────────────────────────────────
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    Enabled = not Enabled
+    if Enabled then 
+        fenv.StartVelocityMove() 
+        ToggleBtn.Text = "BOOST → ON" 
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) 
+        ToggleBtn.TextColor3 = Color3.fromRGB(0,0,0)
+    else 
+        fenv.StopVelocityMove() 
+        ToggleBtn.Text = "BOOST → OFF" 
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30) 
+        ToggleBtn.TextColor3 = Color3.fromRGB(255,255,255) 
+    end
+end)
+
+UnwalkBtn.MouseButton1Click:Connect(function()
+    UnwalkEnabled = not UnwalkEnabled
+    if UnwalkEnabled then 
+        UnwalkBtn.Text = "STATIC → ON" 
+        UnwalkBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) 
+        UnwalkBtn.TextColor3 = Color3.fromRGB(0,0,0)
+    else 
+        UnwalkBtn.Text = "UNWALK → OFF" 
+        UnwalkBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30) 
+        UnwalkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        -- Restore animation speed when turned off
+        if LocalPlayer.Character then
+            local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if Humanoid then
+                local Animator = Humanoid:FindFirstChildOfClass("Animator")
+                if Animator then
+                    for _, track in pairs(Animator:GetPlayingAnimationTracks()) do
+                        track:AdjustSpeed(1)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+SpeedBox.FocusLost:Connect(function() Speed = tonumber(SpeedBox.Text:match("%d+")) or 30 end)
+JumpBox.FocusLost:Connect(function() JumpPower = tonumber(JumpBox.Text:match("%d+")) or 75 end)
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(0.5)
+    if Enabled then fenv.StartVelocityMove() end
+end)
+
+print("Elijr hub Static Slide Loaded!")
+
