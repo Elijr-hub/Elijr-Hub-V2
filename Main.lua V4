@@ -1,0 +1,143 @@
+-- Elijr hub Booster – Screen Button Stealer Edition
+local fenv = getfenv()
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+local VelocityConnection
+local Enabled = false
+local StealEnabled = false
+local Speed = 25
+local JumpPower = 50 
+
+-- ────────────────────────────────────────────────────────────────
+--                         Movement Logic
+-- ────────────────────────────────────────────────────────────────
+
+fenv.StartVelocityMove = function()
+    if VelocityConnection then return end
+    VelocityConnection = RunService.Heartbeat:Connect(function()
+        local Character = LocalPlayer.Character
+        if not Character or not Enabled then return end
+        local HRP = Character:FindFirstChild("HumanoidRootPart")
+        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+        if not HRP or not Humanoid then return end
+        
+        Humanoid.UseJumpPower = true
+        Humanoid.JumpPower = JumpPower
+        local MoveDir = Humanoid.MoveDirection
+        if MoveDir.Magnitude > 0 then
+            local FlatDir = Vector3.new(MoveDir.X, 0, MoveDir.Z).Unit
+            HRP.Velocity = Vector3.new(FlatDir.X * Speed, HRP.Velocity.Y, FlatDir.Z * Speed)
+        end
+    end)
+end
+
+fenv.StopVelocityMove = function()
+    if VelocityConnection then VelocityConnection:Disconnect() VelocityConnection = nil end
+end
+
+-- ────────────────────────────────────────────────────────────────
+--                     Screen Button Steal Logic
+-- ────────────────────────────────────────────────────────────────
+
+task.spawn(function()
+    while true do
+        task.wait(2) -- The 2 second delay you asked for
+        if StealEnabled then
+            -- Scans all GUIs for buttons that say "Steal" or common names
+            for _, gui in pairs(PlayerGui:GetDescendants()) do
+                if gui:IsA("TextButton") or gui:IsA("ImageButton") then
+                    -- If the button is visible and active
+                    if gui.Visible and gui.Parent.Visible then
+                        local text = gui:IsA("TextButton") and gui.Text:lower() or ""
+                        -- Checks if the button name or text contains "steal" or "click"
+                        if text:find("steal") or gui.Name:lower():find("steal") or text:find("click") then
+                            -- Simulates a mouse click
+                            gui:Activate() 
+                            -- Alternatively firing common click events
+                            for _, connection in pairs(getconnections(gui.MouseButton1Click)) do
+                                connection:Fire()
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- ────────────────────────────────────────────────────────────────
+--                           GUI
+-- ────────────────────────────────────────────────────────────────
+
+local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+ScreenGui.Name = "ElijrHubBoosterV4"
+ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 180, 0, 240)
+MainFrame.Position = UDim2.new(1, -200, 0.5, -120)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+Instance.new("UICorner", MainFrame)
+local Stroke = Instance.new("UIStroke", MainFrame)
+Stroke.Color = Color3.fromRGB(255, 215, 0)
+Stroke.Thickness = 2.5
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Text = "Elijr hub Booster"
+Title.TextColor3 = Color3.fromRGB(255, 255, 0)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBlack
+
+local SpeedBox = Instance.new("TextBox", MainFrame)
+SpeedBox.Size = UDim2.new(1, -20, 0, 30)
+SpeedBox.Position = UDim2.new(0, 10, 0, 45)
+SpeedBox.Text = "Speed: 25"
+SpeedBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local JumpBox = Instance.new("TextBox", MainFrame)
+JumpBox.Size = UDim2.new(1, -20, 0, 30)
+JumpBox.Position = UDim2.new(0, 10, 0, 80)
+JumpBox.Text = "Jump: 50"
+JumpBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+JumpBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local ToggleBtn = Instance.new("TextButton", MainFrame)
+ToggleBtn.Size = UDim2.new(1, -20, 0, 35)
+ToggleBtn.Position = UDim2.new(0, 10, 0, 120)
+ToggleBtn.Text = "BOOST → OFF"
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local StealBtn = Instance.new("TextButton", MainFrame)
+StealBtn.Size = UDim2.new(1, -20, 0, 35)
+StealBtn.Position = UDim2.new(0, 10, 0, 165)
+StealBtn.Text = "SCREEN STEAL → OFF"
+StealBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+StealBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Logic
+ToggleBtn.MouseButton1Click:Connect(function()
+    Enabled = not Enabled
+    if Enabled then fenv.StartVelocityMove() ToggleBtn.Text = "BOOST → ON" ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) ToggleBtn.TextColor3 = Color3.fromRGB(0,0,0)
+    else fenv.StopVelocityMove() ToggleBtn.Text = "BOOST → OFF" ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30) ToggleBtn.TextColor3 = Color3.fromRGB(255,255,255) end
+end)
+
+StealBtn.MouseButton1Click:Connect(function()
+    StealEnabled = not StealEnabled
+    if StealEnabled then StealBtn.Text = "STEALING..." StealBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) StealBtn.TextColor3 = Color3.fromRGB(0,0,0)
+    else StealBtn.Text = "SCREEN STEAL → OFF" StealBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30) StealBtn.TextColor3 = Color3.fromRGB(255,255,255) end
+end)
+
+SpeedBox.FocusLost:Connect(function() Speed = tonumber(SpeedBox.Text:match("%d+")) or 25 end)
+JumpBox.FocusLost:Connect(function() JumpPower = tonumber(JumpBox.Text:match("%d+")) or 50 end)
+
+print("Elijr hub V4 (Screen Stealer) loaded!")
+
