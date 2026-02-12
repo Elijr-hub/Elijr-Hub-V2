@@ -1,0 +1,200 @@
+-- Elijr hub Booster – Ultimate X-Ray Edition
+local fenv = getfenv()
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local VelocityConnection
+local Enabled, FlyEnabled, AntiKB, AntiRagdoll, SpinEnabled, XrayEnabled = false, false, false, false, false, false
+local Speed, JumpPower, SpinSpeed, FlySpeed = 30, 75, 50, 15 
+
+-- ────────────────────────────────────────────────────────────────
+--                         X-RAY Logic
+-- ────────────────────────────────────────────────────────────────
+local function ApplyXray(state)
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and not obj:IsDescendantOf(LocalPlayer.Character) then
+            if state then
+                if not obj:FindFirstChild("ElijrXray") then
+                    local original = Instance.new("NumberValue", obj)
+                    original.Name = "ElijrXray"
+                    original.Value = obj.Transparency
+                    obj.Transparency = 0.5 -- Semi-transparent
+                end
+            else
+                local saved = obj:FindFirstChild("ElijrXray")
+                if saved then
+                    obj.Transparency = saved.Value
+                    saved:Destroy()
+                end
+            end
+        end
+    end
+end
+
+-- ────────────────────────────────────────────────────────────────
+--                         Fixed Core Logic
+-- ────────────────────────────────────────────────────────────────
+RunService.Heartbeat:Connect(function()
+    local Character = LocalPlayer.Character
+    if not Character then return end
+    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+    local HRP = Character:FindFirstChild("HumanoidRootPart")
+    if not Humanoid or not HRP then return end
+
+    if AntiRagdoll then
+        if Humanoid:GetState() == Enum.HumanoidStateType.Ragdoll or Humanoid:GetState() == Enum.HumanoidStateType.FallingDown then
+            Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
+    end
+
+    if AntiKB and Enabled and not FlyEnabled then
+        if Humanoid.MoveDirection.Magnitude <= 0 then
+            HRP.Velocity = Vector3.new(0, HRP.Velocity.Y, 0)
+        end
+    end
+end)
+
+fenv.StartVelocityMove = function()
+    if VelocityConnection then return end
+    VelocityConnection = RunService.Heartbeat:Connect(function()
+        local Character = LocalPlayer.Character
+        if not Character or not Enabled or FlyEnabled then return end
+        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+        local HRP = Character:FindFirstChild("HumanoidRootPart")
+        if HRP and Humanoid and Humanoid.MoveDirection.Magnitude > 0 then
+            HRP.Velocity = Vector3.new(Humanoid.MoveDirection.Unit.X * Speed, HRP.Velocity.Y, Humanoid.MoveDirection.Unit.Z * Speed)
+        end
+        if Humanoid then Humanoid.UseJumpPower = true Humanoid.JumpPower = JumpPower end
+    end)
+end
+
+local function ToggleSpin(state)
+    local Character = LocalPlayer.Character
+    local HRP = Character and Character:FindFirstChild("HumanoidRootPart")
+    if state and HRP then
+        local Spin = Instance.new("AngularVelocity", HRP)
+        Spin.Name = "ElijrSpin"
+        Spin.MaxTorque = math.huge
+        Spin.AngularVelocity = Vector3.new(0, SpinSpeed, 0)
+        Spin.Attachment0 = HRP:FindFirstChildOfClass("Attachment") or Instance.new("Attachment", HRP)
+        local Gyro = Instance.new("BodyGyro", HRP)
+        Gyro.Name = "ElijrSpinGyro"
+        Gyro.MaxTorque = Vector3.new(math.huge, 0, math.huge)
+        Gyro.P = 9e6
+    else
+        if HRP then
+            if HRP:FindFirstChild("ElijrSpin") then HRP.ElijrSpin:Destroy() end
+            if HRP:FindFirstChild("ElijrSpinGyro") then HRP.ElijrSpinGyro:Destroy() end
+        end
+    end
+end
+
+local function ToggleFly(state)
+    local Character = LocalPlayer.Character
+    local HRP = Character and Character:FindFirstChild("HumanoidRootPart")
+    local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+    if state and HRP then
+        local BV = Instance.new("BodyVelocity", HRP)
+        BV.Name = "ElijrFly"
+        BV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        local BG = Instance.new("BodyGyro", HRP)
+        BG.Name = "ElijrGyro"
+        BG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        Humanoid.PlatformStand = true
+        fenv.FlyLoop = RunService.RenderStepped:Connect(function()
+            BG.CFrame = Camera.CFrame
+            if Humanoid.MoveDirection.Magnitude > 0 then
+                BV.Velocity = (Camera.CFrame.Rotation * Vector3.new(Humanoid.MoveDirection.X, 0, -Humanoid.MoveDirection.Magnitude)).Unit * FlySpeed
+                BV.Velocity = Vector3.new(BV.Velocity.X, Camera.CFrame.LookVector.Y * FlySpeed * Humanoid.MoveDirection.Magnitude, BV.Velocity.Z)
+            else
+                BV.Velocity = Vector3.new(0, 0.1, 0)
+            end
+        end)
+    else
+        if fenv.FlyLoop then fenv.FlyLoop:Disconnect() end
+        if HRP and HRP:FindFirstChild("ElijrFly") then HRP.ElijrFly:Destroy() end
+        if HRP and HRP:FindFirstChild("ElijrGyro") then HRP.ElijrGyro:Destroy() end
+        if Humanoid then Humanoid.PlatformStand = false end
+    end
+end
+
+-- ────────────────────────────────────────────────────────────────
+--                           GUI
+-- ────────────────────────────────────────────────────────────────
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "ElijrHubBooster"
+ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 180, 0, 440)
+MainFrame.Position = UDim2.new(1, -200, 0.5, -220)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MainFrame.Active = true
+MainFrame.Draggable = true
+Instance.new("UICorner", MainFrame)
+Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(255, 215, 0)
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Text = "Elijr hub Booster"
+Title.TextColor3 = Color3.fromRGB(255, 255, 0)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBlack
+
+local function CreateToggle(text, pos, callback)
+    local Btn = Instance.new("TextButton", MainFrame)
+    Btn.Size = UDim2.new(1, -20, 0, 30)
+    Btn.Position = pos
+    Btn.Text = text
+    Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Instance.new("UICorner", Btn)
+    local s = false
+    Btn.MouseButton1Click:Connect(function()
+        s = not s
+        callback(s, Btn)
+        Btn.BackgroundColor3 = s and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(30, 30, 30)
+        Btn.TextColor3 = s and Color3.fromRGB(0,0,0) or Color3.fromRGB(255, 255, 255)
+    end)
+end
+
+-- Inputs
+local SpeedB = Instance.new("TextBox", MainFrame)
+SpeedB.Size = UDim2.new(1, -20, 0, 25)
+SpeedB.Position = UDim2.new(0, 10, 0, 40)
+SpeedB.Text = "Speed: 30"
+SpeedB.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+SpeedB.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", SpeedB)
+
+local JumpB = Instance.new("TextBox", MainFrame)
+JumpB.Size = UDim2.new(1, -20, 0, 25)
+JumpB.Position = UDim2.new(0, 10, 0, 70)
+JumpB.Text = "Jump: 75"
+JumpB.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+JumpB.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", JumpB)
+
+local FlyB = Instance.new("TextBox", MainFrame)
+FlyB.Size = UDim2.new(1, -20, 0, 25)
+FlyB.Position = UDim2.new(0, 10, 0, 100)
+FlyB.Text = "Fly Speed: 15"
+FlyB.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+FlyB.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", FlyB)
+
+-- Toggles
+CreateToggle("BOOST", UDim2.new(0, 10, 0, 135), function(s) Enabled = s if s then fenv.StartVelocityMove() end end)
+CreateToggle("FLY", UDim2.new(0, 10, 0, 170), function(s) FlyEnabled = s ToggleFly(s) end)
+CreateToggle("SPINBOT", UDim2.new(0, 10, 0, 205), function(s) SpinEnabled = s ToggleSpin(s) end)
+CreateToggle("X-RAY", UDim2.new(0, 10, 0, 240), function(s) XrayEnabled = s ApplyXray(s) end)
+CreateToggle("ANTI-KB", UDim2.new(0, 10, 0, 275), function(s) AntiKB = s end)
+CreateToggle("ANTI-RAGDOLL", UDim2.new(0, 10, 0, 310), function(s) AntiRagdoll = s end)
+
+SpeedB.FocusLost:Connect(function() Speed = tonumber(SpeedB.Text:match("%d+")) or 30 end)
+JumpB.FocusLost:Connect(function() JumpPower = tonumber(JumpB.Text:match("%d+")) or 75 end)
+FlyB.FocusLost:Connect(function() FlySpeed = tonumber(FlyB.Text:match("%d+")) or 15 end)
+
+print("Elijr hub X-Ray Edition Loaded!")
