@@ -1,0 +1,185 @@
+-- Elijr hub Booster – Spin, Jump & Speed Edition
+local fenv = getfenv()
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local VelocityConnection
+local SpinConnection
+local Enabled = false
+local SpinEnabled = false
+local Speed = 30 -- Starting Speed set to 30
+local JumpPower = 75 -- Starting Jump set to 75
+local SpinSpeed = 500 -- Spinbot speed
+
+-- ────────────────────────────────────────────────────────────────
+--                         Movement Logic
+-- ────────────────────────────────────────────────────────────────
+
+fenv.StartVelocityMove = function()
+    if VelocityConnection then return end
+    VelocityConnection = RunService.Heartbeat:Connect(function()
+        local Character = LocalPlayer.Character
+        if not Character or not Enabled then return end
+
+        local HRP = Character:FindFirstChild("HumanoidRootPart")
+        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+        if not HRP or not Humanoid then return end
+
+        Humanoid.UseJumpPower = true
+        Humanoid.JumpPower = JumpPower
+
+        local MoveDir = Humanoid.MoveDirection
+        if MoveDir.Magnitude > 0 then
+            local FlatDir = Vector3.new(MoveDir.X, 0, MoveDir.Z).Unit
+            local Boost = FlatDir * Speed
+            HRP.Velocity = Vector3.new(Boost.X, HRP.Velocity.Y, Boost.Z)
+        end
+    end)
+end
+
+fenv.StopVelocityMove = function()
+    if VelocityConnection then
+        VelocityConnection:Disconnect()
+        VelocityConnection = nil
+    end
+    if LocalPlayer.Character then
+        local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if Humanoid then Humanoid.JumpPower = 50 end
+    end
+end
+
+-- ────────────────────────────────────────────────────────────────
+--                         Spinbot Logic
+-- ────────────────────────────────────────────────────────────────
+
+local function StartSpin()
+    if SpinConnection then return end
+    SpinConnection = RunService.RenderStepped:Connect(function()
+        if SpinEnabled and LocalPlayer.Character then
+            local HRP = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if HRP then
+                HRP.CFrame = HRP.CFrame * CFrame.Angles(0, math.rad(SpinSpeed), 0)
+            end
+        end
+    end)
+end
+
+-- ────────────────────────────────────────────────────────────────
+--                           GUI
+-- ────────────────────────────────────────────────────────────────
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ElijrHubBooster"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size       = UDim2.new(0, 180, 0, 240)
+MainFrame.Position   = UDim2.new(1, -200, 0.5, -120)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active     = true
+MainFrame.Draggable  = true
+MainFrame.Parent     = ScreenGui
+
+local UICorner = Instance.new("UICorner", MainFrame)
+local Stroke = Instance.new("UIStroke", MainFrame)
+Stroke.Color = Color3.fromRGB(255, 215, 0)
+Stroke.Thickness = 2.5
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.BackgroundTransparency = 1
+Title.Text = "Elijr hub Booster"
+Title.TextColor3 = Color3.fromRGB(255, 255, 0)
+Title.Font = Enum.Font.GothamBlack
+Title.Parent = MainFrame
+
+-- Speed Input
+local SpeedBox = Instance.new("TextBox")
+SpeedBox.Size = UDim2.new(1, -20, 0, 28)
+SpeedBox.Position = UDim2.new(0, 10, 0, 45)
+SpeedBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+SpeedBox.Text = "Speed: "..tostring(Speed)
+SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedBox.Parent = MainFrame
+Instance.new("UICorner", SpeedBox)
+
+-- Jump Input
+local JumpBox = Instance.new("TextBox")
+JumpBox.Size = UDim2.new(1, -20, 0, 28)
+JumpBox.Position = UDim2.new(0, 10, 0, 80)
+JumpBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+JumpBox.Text = "Jump: "..tostring(JumpPower)
+JumpBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+JumpBox.Parent = MainFrame
+Instance.new("UICorner", JumpBox)
+
+-- BOOST TOGGLE
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(1, -20, 0, 35)
+ToggleButton.Position = UDim2.new(0, 10, 0, 120)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleButton.Text = "BOOST → OFF"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.Parent = MainFrame
+Instance.new("UICorner", ToggleButton)
+
+-- SPIN TOGGLE
+local SpinButton = Instance.new("TextButton")
+SpinButton.Size = UDim2.new(1, -20, 0, 35)
+SpinButton.Position = UDim2.new(0, 10, 0, 165)
+SpinButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SpinButton.Text = "SPINBOT → OFF"
+SpinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpinButton.Parent = MainFrame
+Instance.new("UICorner", SpinButton)
+
+-- ────────────────────────────────────────────────────────────────
+--                         Logic Handling
+-- ────────────────────────────────────────────────────────────────
+
+ToggleButton.MouseButton1Click:Connect(function()
+    Enabled = not Enabled
+    if Enabled then
+        fenv.StartVelocityMove()
+        ToggleButton.Text = "BOOST → ON"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+        ToggleButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+    else
+        fenv.StopVelocityMove()
+        ToggleButton.Text = "BOOST → OFF"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+end)
+
+SpinButton.MouseButton1Click:Connect(function()
+    SpinEnabled = not SpinEnabled
+    if SpinEnabled then
+        StartSpin()
+        SpinButton.Text = "SPIN → ACTIVE"
+        SpinButton.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+        SpinButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+    else
+        SpinButton.Text = "SPIN → OFF"
+        SpinButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        SpinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+end)
+
+SpeedBox.FocusLost:Connect(function() 
+    local val = tonumber(SpeedBox.Text:match("%d+"))
+    if val then Speed = val end
+    SpeedBox.Text = "Speed: "..tostring(Speed)
+end)
+
+JumpBox.FocusLost:Connect(function() 
+    local val = tonumber(JumpBox.Text:match("%d+"))
+    if val then JumpPower = val end
+    JumpBox.Text = "Jump: "..tostring(JumpPower)
+end)
+
+print("Elijr hub Booster (Spin Edition) loaded!")
+
