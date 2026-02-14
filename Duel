@@ -28,7 +28,7 @@ if not getgenv then
     getgenv = function() return _G end
 end
 
-local ConfigFileName = "22s_DUELS_Config.json"
+local ConfigFileName = "ELIJR_DUELS_Config.json"
 
 local Enabled = {
     SpeedBoost = false,
@@ -822,7 +822,7 @@ local progressConnection = nil
 local StealData = {}
 
 -- Discord text for progress bar
-local DISCORD_TEXT = "discord.gg/22s"
+local DISCORD_TEXT = "https://discord.gg/wVH5swdvHm"
 
 local function getDiscordProgress(percent)
     local totalChars = #DISCORD_TEXT
@@ -1123,7 +1123,7 @@ local C = {
 }
 
 local sg = Instance.new("ScreenGui")
-sg.Name = "22S_BLUE"
+sg.Name = "ELIJR_BLUE"
 sg.ResetOnSpawn = false
 sg.Parent = Player.PlayerGui
 
@@ -1313,7 +1313,7 @@ local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 0, 32 * guiScale)
 titleLabel.Position = UDim2.new(0, 0, 0, 10 * guiScale)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "22S DUELS"
+titleLabel.Text = "ELIJR DUELS"
 titleLabel.TextColor3 = C.text
 titleLabel.Font = Enum.Font.GothamBlack
 titleLabel.TextSize = 28 * guiScale
