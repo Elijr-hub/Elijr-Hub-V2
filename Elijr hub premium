@@ -794,7 +794,7 @@ if not httpRequest then
 end
 
 
-local GITHUB_TOKEN = "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"
+local GITHUB_TOKEN = ""
 local GIST_ID = "c2abee2486327152f66f97dc197e8f7e"
 local GIST_FILENAME = "players.json"
 
