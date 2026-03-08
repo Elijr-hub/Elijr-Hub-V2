@@ -29,14 +29,14 @@ end
 local ConfigFileName = "ElijrHub_Advanced_Config.json"
 
 local Enabled = {
-    SpeedBoost = false,
-    AntiRagdoll = false,
+    SpeedBoost = true,
+    AntiRagdoll = true,
     SpinBot = false,
-    SpeedWhileStealing = false,
-    AutoSteal = false,
-    Unwalk = false,
+    SpeedWhileStealing = true,
+    AutoSteal = true,
+    Unwalk = true,
     Optimizer = false,
-    Galaxy = false,
+    Galaxy = true,
     SpamBat = false,
     BatAimbot = false,
     AutoDisableSpeed = true,
@@ -52,22 +52,22 @@ local Enabled = {
 }
 
 local Values = {
-    BoostSpeed = 30,
+    BoostSpeed = 60,
     SpinSpeed = 30,
-    StealingSpeedValue = 29,
+    StealingSpeedValue = 31,
     STEAL_RADIUS = 100,
     STEAL_DURATION = 1.2,
     DEFAULT_GRAVITY = 196.2,
-    GalaxyGravityPercent = 70,
-    HOP_POWER = 35,
+    GalaxyGravityPercent = 48,
+    HOP_POWER = 48,
     HOP_COOLDOWN = 0.08,
     NameTagSize = 1,
-    FOV = 70,
+    FOV = 120,
     ESPColorR = 255,
     ESPColorG = 255,
     ESPColorB = 255,
-    GUIBlurSize = 5,
-    GUIBorderRadius = 20,
+    GUIBlurSize = 1,
+    GUIBorderRadius = 40,
     GUIBackgroundAlpha = 0
 }
 
