@@ -2641,20 +2641,6 @@ task.spawn(function()
     if Enabled.AutoWalkEnabled then AutoWalkEnabled = true startAutoWalk() end
     if Enabled.AutoRightEnabled then AutoRightEnabled = true startAutoRight() end
 
-    local OpenBtn = Instance.new("TextButton", ScreenGui)
-OpenBtn.Size = UDim2.new(0, 60, 0, 60)
-OpenBtn.Position = UDim2.new(0, 15, 0.5, -30)
-OpenBtn.BackgroundColor3 = Color3.new(0,0,0)
-OpenBtn.Text = "<b>OPEN</b>"
-OpenBtn.TextColor3 = Color3.new(1,1,0)
-OpenBtn.RichText = true
-OpenBtn.Font = Enum.Font.FredokaOne
-OpenBtn.Visible = false
-OpenBtn.Active = true
-OpenBtn.Draggable = true -- Makes the circle moveable
-Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
-Instance.new("UIStroke", OpenBtn).Color = Color3.new(1,1,0)
-
     workspace.CurrentCamera.FieldOfView = Values.FOV
     
     applyTheme(Enabled.GUITheme or "Ocean")
