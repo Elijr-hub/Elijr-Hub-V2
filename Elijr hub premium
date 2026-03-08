@@ -55,8 +55,8 @@ local Values = {
     BoostSpeed = 30,
     SpinSpeed = 30,
     StealingSpeedValue = 29,
-    STEAL_RADIUS = 20,
-    STEAL_DURATION = 1.3,
+    STEAL_RADIUS = 100,
+    STEAL_DURATION = 1.2,
     DEFAULT_GRAVITY = 196.2,
     GalaxyGravityPercent = 70,
     HOP_POWER = 35,
@@ -939,11 +939,11 @@ createScriptUserESP = function(playerName)
     textLabel.TextSize = 38 * Values.NameTagSize
     
     if isOwner then
-        textLabel.Text = "ðŸ‘‘ owner of elijr hub ðŸ‘‘"
+        textLabel.Text = "owner of elijr hub"
         textLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
         textLabel.TextStrokeColor3 = Color3.fromRGB(139, 90, 0)
     elseif isDeveloper then
-        textLabel.Text = "ðŸ˜¡ ELIJR HUB Developer ðŸ˜¡"
+        textLabel.Text = "ELIJR HUB Developer"
         textLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
         textLabel.TextStrokeColor3 = Color3.fromRGB(139, 0, 0)
     else
@@ -1440,7 +1440,7 @@ local stealStartTime = nil
 local progressConnection = nil
 local StealData = {}
 
-local DISCORD_TEXT = "discord.gg/VXgngYEC"
+local DISCORD_TEXT = "discord.gg/99t7kva4N"
 
 local function getDiscordProgress(percent)
     local totalChars = #DISCORD_TEXT
@@ -1804,7 +1804,7 @@ local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 0, 50 * guiScale)
 titleLabel.Position = UDim2.new(0, 0, 0.2, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "ðŸŒŠ ELIJR HUB DUELS ðŸŒŠ"
+titleLabel.Text = "ELIJR HUB DUELS"
 titleLabel.TextColor3 = C.foam
 titleLabel.Font = Enum.Font.GothamBlack
 titleLabel.TextSize = 36 * guiScale
@@ -1815,7 +1815,7 @@ local subtitleLabel = Instance.new("TextLabel", header)
 subtitleLabel.Size = UDim2.new(1, 0, 0, 30 * guiScale)
 subtitleLabel.Position = UDim2.new(0, 0, 0.6, 0)
 subtitleLabel.BackgroundTransparency = 1
-subtitleLabel.Text = "PREMIUM EDITION â€¢ discord.gg/99t7kva4N"
+subtitleLabel.Text = "PREMIUM EDITION discord.gg/99t7kva4N"
 subtitleLabel.TextColor3 = C.pearl
 subtitleLabel.Font = Enum.Font.GothamBold
 subtitleLabel.TextSize = 16 * guiScale
@@ -1826,7 +1826,7 @@ local closeBtn = Instance.new("TextButton", header)
 closeBtn.Size = UDim2.new(0, 44 * guiScale, 0, 44 * guiScale)
 closeBtn.Position = UDim2.new(1, -54 * guiScale, 0.5, -22 * guiScale)
 closeBtn.BackgroundColor3 = C.coralDark
-closeBtn.Text = "âœ•"
+closeBtn.Text = "X"
 closeBtn.TextColor3 = C.foam
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextSize = 28 * guiScale
@@ -2506,7 +2506,7 @@ Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 15 * guiScale)
 
 saveBtn.MouseButton1Click:Connect(function()
     local success = SaveConfig()
-    saveBtn.Text = success and "âœ“" or "âœ—"
+    saveBtn.Text = success and "success“" or "success"
     TweenService:Create(saveBtn, TweenInfo.new(0.3), {BackgroundColor3 = success and C.success or C.danger}):Play()
     task.delay(1, function()
         saveBtn.Text = "SAVE"
@@ -2646,8 +2646,8 @@ task.spawn(function()
     applyTheme(Enabled.GUITheme or "Ocean")
 end)
 
-print("ðŸŒŠ ELIJR HUB DUELS - PREMIUM EDITION Loaded! (95% SIZE) ðŸŒŠ")
-print("ðŸ  CLEAN FISH BACKGROUND ADDED! ðŸ ")
-print("âš¡ REVERTED: Original Anti-Ragdoll and Original Bat Aimbot")
+print(" ELIJR HUB DUELS - PREMIUM EDITION Loaded! (95% SIZE) ")
+print("  CLEAN FISH BACKGROUND ADDED!  ")
+print(" REVERTED: Original Anti-Ragdoll and Original Bat Aimbot")
 print("V: Sprint | N: Rotate | M: Low G | X: Aimbot | Z: Left | C: Right | Q: Nuke | U: Toggle")
-print("ðŸ”— discord.gg/99t7kva4N")
+print("discord.gg/99t7kva4N")
